@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Divider
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import expr.secminhr.cavern.articleinfo.ArticleInfo
 import expr.secminhr.cavern.articleinfo.ArticleInfoListRepo
 import expr.secminhr.cavern.network.ArticleInfoListNetworkJsonSource
@@ -33,18 +33,19 @@ import expr.secminhr.cavern.serialize.ArticleInfoListJsonFetcher
 import expr.secminhr.cavern.ui.theme.CavernTheme
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 
 class MainActivity : ComponentActivity() {
-    private val client = HttpClient(CIO)
-    private val articleInfoListSource = ArticleInfoListNetworkJsonSource(client)
-    private val articleInfoListFetcher = ArticleInfoListJsonFetcher(articleInfoListSource)
-    private val articleInfoListRepo = ArticleInfoListRepo(articleInfoListFetcher)
-
     private val viewModel: MainActivityViewModel by viewModels<MainActivityViewModel> {
         object: ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val client = HttpClient(CIO)
+                val articleInfoListSource = ArticleInfoListNetworkJsonSource(client)
+                val articleInfoListFetcher = ArticleInfoListJsonFetcher(articleInfoListSource)
+                val articleInfoListRepo = ArticleInfoListRepo(articleInfoListFetcher)
                 return MainActivityViewModel(articleInfoListRepo) as T
             }
         }
@@ -60,12 +61,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Scaffold(floatingActionButton = {
-                        FloatingActionButton(onClick = viewModel::onLoadButtonClicked) {
-                            Text(text = "Load")
-                        }
-                    }) {
-                        ArticleInfoList(Modifier.padding(it), viewModel.infoList)
+                    Scaffold {
+                        ArticleInfoList(Modifier.padding(it), viewModel.infoListPager.flow)
                     }
                 }
             }
@@ -74,10 +71,17 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ArticleInfoList(modifier: Modifier = Modifier, infoList: List<ArticleInfo>) {
+fun ArticleInfoList(
+    modifier: Modifier = Modifier,
+    pagingFlow: Flow<PagingData<ArticleInfo>>
+) {
+    val infoList = pagingFlow.collectAsLazyPagingItems()
     LazyColumn(modifier = modifier) {
-        items(infoList) {
-            ArticleInfoItem(it)
+        items(infoList.itemCount) {
+            val info = infoList[it]
+            if (info != null) {
+                ArticleInfoItem(info)
+            }
             Divider()
         }
     }
@@ -107,7 +111,7 @@ fun ArticleInfoItem(articleInfo: ArticleInfo) {
 @Preview(showBackground = true)
 @Composable
 fun ArticleInfoListPreview() {
-    ArticleInfoList(infoList = buildList {
+    val list = buildList {
         for (i in 1..5) {
             add(ArticleInfo(
                 "$i",
@@ -124,7 +128,8 @@ fun ArticleInfoListPreview() {
                 i * 2, i, i % 2 == 0
             ))
         }
-    })
+    }
+    ArticleInfoList(pagingFlow = MutableStateFlow(PagingData.from(list)))
 }
 
 @Preview(showBackground = true)

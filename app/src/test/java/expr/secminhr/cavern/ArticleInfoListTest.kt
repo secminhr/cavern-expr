@@ -34,4 +34,28 @@ class ArticleInfoListTest {
 
         assertEquals(info, articleInfoListRepo.infoList)
     }
+
+    @Test
+    fun testUpdateListener() = runTest {
+        val fetcher = mockk<ArticleInfoListFetcher>()
+        val info = listOf(mockk<ArticleInfo>(), mockk<ArticleInfo>(), mockk<ArticleInfo>(), mockk<ArticleInfo>())
+        coEvery { fetcher.fetch(any()) } answers {
+            if (arg<Int>(0) == 1) {
+                info.slice(0..1)
+            } else {
+                info.slice(2..3)
+            }
+        }
+
+        val articleInfoListRepo = ArticleInfoListRepo(fetcher)
+        val list = mutableListOf<ArticleInfo>()
+        articleInfoListRepo.addInfoListUpdateListener {
+            list.addAll(it)
+        }
+
+        articleInfoListRepo.fetchNextPage()
+        articleInfoListRepo.fetchNextPage()
+
+        assertEquals(articleInfoListRepo.infoList, list)
+    }
 }

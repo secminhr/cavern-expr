@@ -15,9 +15,11 @@ class ArticleInfoListRepo(private val fetcher: ArticleInfoListFetcher) {
 
     private var nextPage = 1
 
-    suspend fun fetchNextPage() {
+    suspend fun fetchNextPage(): List<ArticleInfo> {
         val nextList = fetcher.fetch(nextPage++)
         _infoList += nextList
         onInfoListUpdate(nextList)
+
+        return nextList
     }
 }
