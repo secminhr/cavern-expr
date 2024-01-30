@@ -1,34 +1,46 @@
 package expr.secminhr.cavern
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
+import androidx.lifecycle.viewModelScope
 import expr.secminhr.cavern.articleinfo.ArticleInfo
 import expr.secminhr.cavern.articleinfo.ArticleInfoListRepo
+import kotlinx.coroutines.launch
 
 class MainActivityViewModel(private val articleInfoListRepo: ArticleInfoListRepo): ViewModel() {
-    val infoListPager = Pager(
-        PagingConfig(pageSize = 10),
-        pagingSourceFactory = {
-            ArticleInfoListPagingSource(articleInfoListRepo)
-        }
-    )
+    class AutoFetchList(
+        articleInfoListRepo: ArticleInfoListRepo?,
+        private val list: MutableList<ArticleInfo> = mutableStateListOf(),
+        private val fetchNext: () -> Unit) {
 
-    private class ArticleInfoListPagingSource(private val articleInfoListRepo: ArticleInfoListRepo): PagingSource<Int, ArticleInfo>() {
-        override fun getRefreshKey(state: PagingState<Int, ArticleInfo>): Int? {
-            return null
+        var count by mutableIntStateOf(list.size)
+            private set
+
+        init {
+            articleInfoListRepo?.addInfoListUpdateListener {
+                list.addAll(it)
+                count = list.size
+            }
         }
 
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ArticleInfo> {
-            val list = articleInfoListRepo.fetchNextPage()
+        operator fun get(index: Int): ArticleInfo {
+            if (list.size - index <= 15) {
+                fetchNext()
+            }
 
-            return LoadResult.Page(
-                data = list,
-                nextKey = (params.key ?: 1) + 1,
-                prevKey = params.key?.let { it - 1 }
-            )
+            return list[index]
         }
+    }
+
+    val infoList = AutoFetchList(articleInfoListRepo, fetchNext = ::fetchNextPage)
+    init {
+        fetchNextPage()
+    }
+
+    private fun fetchNextPage() {
+        viewModelScope.launch { articleInfoListRepo.fetchNextPage() }
     }
 }

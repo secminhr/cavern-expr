@@ -1,6 +1,5 @@
 val mockkVersion = "1.13.9"
 val ktor_version = "2.3.7"
-val paging_version = "3.2.1"
 
 plugins {
     id("com.android.application")
@@ -65,8 +64,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
-    implementation("androidx.paging:paging-runtime:$paging_version")
-    implementation("androidx.paging:paging-compose:3.3.0-alpha02")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
     implementation("io.ktor:ktor-client-core:$ktor_version")
