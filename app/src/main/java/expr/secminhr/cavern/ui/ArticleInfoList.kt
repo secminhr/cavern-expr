@@ -5,9 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,24 +27,23 @@ import kotlinx.datetime.Month
 fun ArticleInfoList(
     modifier: Modifier = Modifier,
     pagingFlow: MainActivityViewModel.AutoFetchList,
+    listState: LazyListState = rememberLazyListState(),
     onItemClicked: (ArticleInfo) -> Unit = {}
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = modifier, state = listState) {
         items(pagingFlow.count) { index ->
             val info = pagingFlow[index]
             ArticleInfoItem(info) {
                 onItemClicked(info)
             }
-            Divider()
         }
     }
 }
 
 @Composable
-fun ArticleInfoItem(articleInfo: ArticleInfo, onItemClicked: () -> Unit = {}) {
+fun ArticleInfoItem(articleInfo: ArticleInfo, onItemClicked: (() -> Unit)? = null) {
     Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable(onClick = onItemClicked)
+        modifier = onItemClicked?.let { Modifier.clickable { it() } } ?: Modifier
     ) {
         Column(modifier = Modifier
             .weight(1f)
@@ -74,7 +74,7 @@ fun ArticleInfoListPreview() {
         for (i in 1..5) {
             add(
                 ArticleInfo(
-                "$i",
+                i,
                 "title${i}",
                 "authorUsername${i}", "author${i}",
                 LocalDateTime(
@@ -99,7 +99,7 @@ fun ArticleInfoListPreview() {
 fun ArticleInfoItemPreview() {
     ArticleInfoItem(
         ArticleInfo(
-            "5",
+            5,
             "title",
             "authorUsername", "author",
             LocalDateTime(
@@ -120,7 +120,7 @@ fun ArticleInfoItemPreview() {
 fun ArticleInfoItemLongTitlePreview() {
     ArticleInfoItem(
         ArticleInfo(
-            "5",
+            5,
             "Soooooooooooooooooooooooooooooo loooooooooong title",
             "authorUsername", "author",
             LocalDateTime(
@@ -141,7 +141,7 @@ fun ArticleInfoItemLongTitlePreview() {
 fun ArticleInfoItemLongNumber() {
     ArticleInfoItem(
         ArticleInfo(
-            "5",
+            5,
             "title",
             "authorUsername", "author",
             LocalDateTime(

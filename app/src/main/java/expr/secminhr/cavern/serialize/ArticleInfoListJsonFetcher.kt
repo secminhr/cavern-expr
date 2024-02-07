@@ -26,7 +26,7 @@ class ArticleInfoListJsonFetcher(private val jsonSource: ArticleInfoListJsonSour
         private val islike: Boolean
     ) {
         fun toArticleInfo(): ArticleInfo = ArticleInfo(
-            "$pid", title, author, name,
+            pid, title, author, name,
             //replace the space between date and time by T to make it iso
             time.replace(' ', 'T').toLocalDateTime(),
             comments_count.toInt(), likes_count.toInt(), islike

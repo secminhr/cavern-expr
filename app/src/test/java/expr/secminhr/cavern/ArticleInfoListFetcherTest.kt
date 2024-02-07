@@ -44,7 +44,7 @@ class ArticleInfoListFetcherTest {
             for (i in 1..5) {
                 add(
                     ArticleInfo(
-                    "$i",
+                    i,
                     "title${i}",
                     "authorUsername${i}", "author${i}",
                     LocalDateTime(
