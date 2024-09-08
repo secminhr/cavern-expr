@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import expr.secminhr.cavern.MainActivityViewModel
+import expr.secminhr.cavern.ArticleInfoListViewModel
 import expr.secminhr.cavern.articleinfo.ArticleInfo
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
@@ -26,7 +26,7 @@ import kotlinx.datetime.Month
 @Composable
 fun ArticleInfoList(
     modifier: Modifier = Modifier,
-    pagingFlow: MainActivityViewModel.AutoFetchList,
+    pagingFlow: ArticleInfoListViewModel.AutoFetchList,
     listState: LazyListState = rememberLazyListState(),
     onItemClicked: (ArticleInfo) -> Unit = {}
 ) {
@@ -91,7 +91,7 @@ fun ArticleInfoListPreview() {
         }
     }
 //    ArticleInfoList(pagingFlow = MutableStateFlow(PagingData.from(list)))
-    ArticleInfoList(pagingFlow = MainActivityViewModel.AutoFetchList(null, list.toMutableList()) { })
+    ArticleInfoList(pagingFlow = ArticleInfoListViewModel.AutoFetchList(null, list.toMutableList()) { })
 }
 
 @Preview(showBackground = true)
