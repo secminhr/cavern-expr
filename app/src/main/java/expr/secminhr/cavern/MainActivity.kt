@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,17 +76,31 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavFrame(
                         backToList = navState::backToList,
-                        showingBackButton = navState.showingBackButton
+                        showingBackButton = navState.showingBackButton,
+                        actions = {
+                            IconButton({ navState.enterLoginPage() }) {
+                                Icon(
+                                    Icons.Default.AccountCircle,
+                                    contentDescription = "login button"
+                                )
+                            }
+                        }
                     ) {
                         val listState = rememberLazyListState()  // preserve across screen changes
                         Crossfade(modifier = Modifier.padding(it), targetState = navState.currentScreen) { screen ->
-                            if (screen == NavigationState.Screen.ArticleInfoList) {
-                                ArticleInfoList(pagingFlow = viewModel.infoList, listState = listState, onItemClicked = navState::articleInfoClicked)
-                            } else {
-                                var article by remember { mutableStateOf<Article?>(null) }
-                                ArticleScreen(article)
-                                LaunchedEffect(navState.showingArticleInfo) {
-                                    article = articleRepo.getArticle(navState.showingArticleInfo!!.articleId)
+                            when (screen) {
+                                NavigationState.Screen.ArticleInfoList -> {
+                                    ArticleInfoList(pagingFlow = viewModel.infoList, listState = listState, onItemClicked = navState::articleInfoClicked)
+                                }
+                                NavigationState.Screen.Article -> {
+                                    var article by remember { mutableStateOf<Article?>(null) }
+                                    ArticleScreen(article)
+                                    LaunchedEffect(navState.showingArticleInfo) {
+                                        article = articleRepo.getArticle(navState.showingArticleInfo!!.articleId)
+                                    }
+                                }
+                                NavigationState.Screen.Login -> {
+                                    Text("Login")
                                 }
                             }
                         }
@@ -97,7 +113,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavFrame(backToList: () -> Unit = {}, showingBackButton: Boolean, content: @Composable (PaddingValues) -> Unit) {
+fun NavFrame(backToList: () -> Unit = {}, showingBackButton: Boolean, actions: @Composable RowScope.() -> Unit = { }, content: @Composable (PaddingValues) -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -117,7 +133,8 @@ fun NavFrame(backToList: () -> Unit = {}, showingBackButton: Boolean, content: @
                             )
                         }
                     }
-                }
+                },
+                actions = actions
             )
         },
         content = content

@@ -34,4 +34,13 @@ class NavigationTest {
 
         assertEquals(navState.currentScreen, NavigationState.Screen.ArticleInfoList)
     }
+
+    @Test
+    fun testUserEnterLoginPage() {
+        val navState = NavigationState()
+        navState.enterLoginPage()
+
+        assertEquals(navState.currentScreen, NavigationState.Screen.Login)
+        assertTrue(navState.showingBackButton)
+    }
 }

@@ -8,7 +8,8 @@ import expr.secminhr.cavern.articleinfo.ArticleInfo
 class NavigationState {
     enum class Screen {
         ArticleInfoList,
-        Article
+        Article,
+        Login
     }
 
     var showingArticleInfo: ArticleInfo? by mutableStateOf(null)
@@ -26,5 +27,9 @@ class NavigationState {
 
     fun backToList() {
         currentScreen = Screen.ArticleInfoList
+    }
+
+    fun enterLoginPage() {
+        currentScreen = Screen.Login
     }
 }
