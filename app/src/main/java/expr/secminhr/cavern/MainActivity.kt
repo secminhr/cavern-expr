@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
                                 ArticleInfoList(pagingFlow = viewModel.infoList, listState = listState, onItemClicked = navState::articleInfoClicked)
                             } else {
                                 var article by remember { mutableStateOf<Article?>(null) }
-                                ArticleScreen(navState.showingArticleInfo!!, article)
+                                ArticleScreen(article)
                                 LaunchedEffect(navState.showingArticleInfo) {
                                     article = articleRepo.getArticle(navState.showingArticleInfo!!.articleId)
                                 }
