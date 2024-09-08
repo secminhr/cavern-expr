@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowLeft
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,9 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,18 +79,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavFrame(listPagerFlow = viewModel.infoList, article = viewModel.article, getArticle = {
-                        viewModel.viewArticle(it)
-                    }) {
-                        viewModel.article = null
-                    }
+                    NavFrame(
+                        listPagerFlow = viewModel.infoList,
+                        article = viewModel.article,
+                        getArticle = {
+                            viewModel.viewArticle(it)
+                        },
+                        backToList = {
+                            viewModel.article = null
+                        })
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavFrame(listPagerFlow: MainActivityViewModel.AutoFetchList, article: Article?, getArticle: (ArticleInfo) -> Unit = {}, backToList: () -> Unit = {}) {
     var currentShowingArticleInfo: ArticleInfo? by remember {
